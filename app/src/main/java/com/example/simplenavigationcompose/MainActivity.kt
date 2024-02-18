@@ -4,14 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.simplenavigationcompose.ui.navigation.NavGraph
 import com.example.simplenavigationcompose.ui.theme.SimpleNavComposeAppTheme
 
@@ -19,7 +22,30 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MainScreen()
+            SendComplexData()
+            //App()
+            //Test()
+            //MainScreen()
+        }
+    }
+}
+
+@Composable fun Test(){
+
+    //step 1
+    val navController = rememberNavController()
+
+    //step 2
+    NavHost(navController = navController, startDestination = "firstScreen"){
+
+        //step3
+        composable("firstScreen"){
+            //step 3
+            LoginScreen()
+        }
+        composable("secondScreen"){
+            //step 3
+            MainScreen2()
         }
     }
 }
@@ -31,6 +57,21 @@ private fun MainScreen() {
         // and it should be remembered because it will be used in multiple screens
         val navController = rememberNavController()
         NavGraph(navController)
+    }
+}
+
+@Composable
+private fun SendComplexData(){
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "firstScreen") {
+        composable("firstScreen") { FirstScreen(navController) }
+        composable("secondScreen/{data}",
+            arguments = listOf(navArgument("data") {
+                type = NavType.ParcelableType(ComplexData::class.java)
+            })
+        ) { backStackEntry ->
+            secondScreen(backStackEntry.arguments?.getParcelable("data"))
+        }
     }
 }
 
@@ -70,4 +111,17 @@ private fun MainScreen() {
     Text(text = "Main Screen2", style = MaterialTheme.typography.h1)
 }
 
-//First we have to define composeable functions that represent screens
+
+@Composable
+fun FirstScreen(navController: NavController) {
+    val data = ComplexData("Zain", 29)
+    Button(onClick = { navController.navigate("secondScreen/${data}") }) {
+        Text("Navigate to Second Screen")
+    }
+}
+
+@Composable
+fun secondScreen(data: ComplexData?) {
+    Text("Received data: ${data?.name}, ${data?.age}")
+}
+
